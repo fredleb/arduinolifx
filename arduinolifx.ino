@@ -24,11 +24,12 @@
  */
 
 
-#include <SPI.h>   
-#include <Ethernet.h>
-#include <EthernetServer.h>
-#include <EthernetUdp.h> 
-#include <EEPROM.h>   
+#include <EEPROM.h>
+#include <ESP8266WiFi.h>
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiUdp.h>
+#include <WiFiManager.h>
 
 #include "lifx.h"
 #include "RGBMoodLifx.h"
@@ -66,9 +67,9 @@ long kel = 2000;
 long dim = 0;
 
 // Ethernet instances, for UDP broadcasting, and TCP server and client
-EthernetUDP Udp;
-EthernetServer TcpServer = EthernetServer(LifxPort);
-EthernetClient client;
+WiFiUDP Udp;
+WiFiServer TcpServer = WiFiServer(LifxPort);
+WiFiClient client;
 
 RGBMoodLifx LIFXBulb(redPin, greenPin, bluePin);
 
@@ -251,7 +252,7 @@ void loop() {
 
   }
 
-  Ethernet.maintain();
+  //Ethernet.maintain();
 
   //delay(10);
 }
