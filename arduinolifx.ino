@@ -36,7 +36,9 @@
 #include "color.h"
 
 // set to 1 to output debug messages (including packet dumps) to serial (38400 baud)
-const boolean DEBUG = 0;
+#ifndef DEBUG
+#define DEBUG 0
+#endif
 
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
