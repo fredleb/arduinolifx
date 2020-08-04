@@ -77,5 +77,7 @@ const byte MESH_FIRMWARE_STATE = 0x0f;
 #define EEPROM_CONFIG "AL1" // 3 byte identifier for this sketch's EEPROM settings
 #define EEPROM_CONFIG_START 253 // store EEPROM_CONFIG at the end of EEPROM
 
+#define EEPROM_CONFIG_LEN 256
+
 // helpers
 #define SPACE " "

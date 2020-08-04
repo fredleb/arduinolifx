@@ -102,6 +102,8 @@ void setup() {
   LIFXBulb.setFadingSpeed(20);
   
   // read in settings from EEPROM (if they exist) for bulb label and tags
+  EEPROM.begin(EEPROM_CONFIG_LEN);
+
   if(EEPROM.read(EEPROM_CONFIG_START) == EEPROM_CONFIG[0]
     && EEPROM.read(EEPROM_CONFIG_START+1) == EEPROM_CONFIG[1]
     && EEPROM.read(EEPROM_CONFIG_START+2) == EEPROM_CONFIG[2]) {
@@ -169,6 +171,8 @@ void setup() {
     for(int i = 0; i < LifxBulbTagLabelsLength; i++) {
       EEPROM.write(EEPROM_BULB_TAG_LABELS_START+i, bulbTagLabels[i]);
     }
+
+    EEPROM.commit();
       
     if(DEBUG) {
       Serial.println(F("Done writing EEPROM config."));
@@ -177,7 +181,7 @@ void setup() {
   
   if(DEBUG) {
     Serial.println(F("EEPROM dump:"));
-    for(int i = 0; i < 256; i++) {
+    for(int i = 0; i < EEPROM_CONFIG_LEN; i++) {
       Serial.print(EEPROM.read(i));
       Serial.print(SPACE);
     }
