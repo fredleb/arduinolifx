@@ -174,6 +174,9 @@ void RGBMoodLifx::tick() {
           setHSB(random(345, 435), random(190, 255), random(120,255));
           holding_color_ = random(10, 500);
           break;
+        default:
+          // ignore
+          break;
       }
     }
   }
