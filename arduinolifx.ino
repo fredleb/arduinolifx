@@ -351,68 +351,29 @@ void handleRequest(LifxPacket &request) {
 
   case GET_LIGHT_STATE: 
     {
+      if (DEBUG >= 2) {
+        Serial.println("Received GET_LIGHT_STATE request");
+      }
+
       // send the light's state
       response.packet_type = LIGHT_STATUS;
       response.protocol = LifxProtocol_AllBulbsResponse;
-      byte StateData[] = { 
-        lowByte(hue),  //hue
-        highByte(hue), //hue
-        lowByte(sat),  //sat
-        highByte(sat), //sat
-        lowByte(bri),  //bri
-        highByte(bri), //bri
-        lowByte(kel),  //kel
-        highByte(kel), //kel
-        lowByte(dim),  //dim
-        highByte(dim), //dim
-        lowByte(power_status),  //power status
-        highByte(power_status), //power status
-        // label
-        lowByte(bulbLabel[0]),
-        lowByte(bulbLabel[1]),
-        lowByte(bulbLabel[2]),
-        lowByte(bulbLabel[3]),
-        lowByte(bulbLabel[4]),
-        lowByte(bulbLabel[5]),
-        lowByte(bulbLabel[6]),
-        lowByte(bulbLabel[7]),
-        lowByte(bulbLabel[8]),
-        lowByte(bulbLabel[9]),
-        lowByte(bulbLabel[10]),
-        lowByte(bulbLabel[11]),
-        lowByte(bulbLabel[12]),
-        lowByte(bulbLabel[13]),
-        lowByte(bulbLabel[14]),
-        lowByte(bulbLabel[15]),
-        lowByte(bulbLabel[16]),
-        lowByte(bulbLabel[17]),
-        lowByte(bulbLabel[18]),
-        lowByte(bulbLabel[19]),
-        lowByte(bulbLabel[20]),
-        lowByte(bulbLabel[21]),
-        lowByte(bulbLabel[22]),
-        lowByte(bulbLabel[23]),
-        lowByte(bulbLabel[24]),
-        lowByte(bulbLabel[25]),
-        lowByte(bulbLabel[26]),
-        lowByte(bulbLabel[27]),
-        lowByte(bulbLabel[28]),
-        lowByte(bulbLabel[29]),
-        lowByte(bulbLabel[30]),
-        lowByte(bulbLabel[31]),
-        //tags
-        lowByte(bulbTags[0]),
-        lowByte(bulbTags[1]),
-        lowByte(bulbTags[2]),
-        lowByte(bulbTags[3]),
-        lowByte(bulbTags[4]),
-        lowByte(bulbTags[5]),
-        lowByte(bulbTags[6]),
-        lowByte(bulbTags[7])
-        };
 
-      memcpy(response.data, StateData, sizeof(StateData));
-      response.data_size = sizeof(StateData);
+      Lifx_GET_LIGHT_STATE__ANSWER answer;
+      answer.hue = LE16(hue);
+      answer.saturation = LE16(sat);
+      answer.brightness = LE16(sat);
+      answer.kelvin = LE16(kel);
+
+      answer.reserved0 = 0;
+
+      answer.power = power_status;
+      strncpy(answer.bulb_label, eeprom.sLabel, LIFX_LABEL_LENGTH);
+
+      answer.tags = 0;
+
+      memcpy(response.data, (void*) &answer, sizeof(answer));
+      response.data_size = sizeof(answer);
       sendPacket(response);
     } 
     break;
