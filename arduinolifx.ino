@@ -73,28 +73,15 @@ LifxEEPROM eeprom;
 
 // Ethernet instances, for UDP broadcasting, and TCP server and client
 WiFiUDP Udp;
-WiFiServer TcpServer = WiFiServer(LifxPort);
+WiFiServer TcpServer(LifxPort);
 WiFiClient client;
 
 RGBMoodLifx LIFXBulb(redPin, greenPin, bluePin);
 
 void setup() {
 
-  Serial.begin(38400);
-  Serial.println(F("LIFX bulb emulator for Arduino starting up..."));
-
-  // start the Ethernet - using DHCP so keep trying until we get an address
-  while(Ethernet.begin(mac) == 0) {
-    Serial.println(F("Failed to get DHCP address, trying again..."));
-    delay(1000);
-  }
-
-  Serial.print(F("IP address for this bulb: "));
-  Serial.println(Ethernet.localIP());
-
-  // set up a UDP and TCP port ready for incoming
-  Udp.begin(LifxPort);
-  TcpServer.begin();
+  Serial.begin(115200);
+  Serial.println(F("LIFX bulb emulator for ESP8266 starting up..."));
 
   // set up the LED pins
   pinMode(redPin, OUTPUT); 
@@ -145,6 +132,38 @@ void setup() {
       Serial.print(SPACE);
     }
     Serial.println();
+  }
+
+  // If no wifi credentials have been saved in the config, go into AP mode
+  if (eeprom.sSSID[0] == 0) {
+    //setAPMode();
+  } else {
+    /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
+     would try to act as both a client and an access-point and could cause
+     network-issues with your other WiFi-devices on your WiFi-network. */
+    WiFi.mode(WIFI_STA);
+
+    // connect to known wifi network
+    Serial.print("Attempting to connect to WPA SSID: ");
+    Serial.print(eeprom.sSSID);
+    if (DEBUG) {
+      Serial.print("/");
+      Serial.print(eeprom.sPassword);
+    }
+    WiFi.begin(eeprom.sSSID, eeprom.sPassword);
+
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(".");
+    }
+
+    Serial.println("");
+    Serial.print(F("WiFi connected. IP address for this bulb: "));
+    Serial.println(WiFi.localIP());
+
+    // set up a UDP and TCP port ready for incoming
+    Udp.begin(LifxPort);
+    TcpServer.begin();
   }
 
   // set the bulb based on the initial colors
