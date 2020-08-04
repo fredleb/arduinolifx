@@ -213,7 +213,7 @@ void loop() {
   if(packetSize) {
     Udp.read(PacketBuffer, 128);
 
-    if(DEBUG) {
+    if (DEBUG >= 3) {
       Serial.print(F("-UDP "));
       for(int i = 0; i < LifxPacketSize; i++) {
         Serial.print(PacketBuffer[i], HEX);
@@ -274,9 +274,6 @@ void processRequest(byte *packetBuffer, int packetSize, LifxPacket &request) {
 }
 
 void handleRequest(LifxPacket &request) {
-  if(DEBUG) {
-    Serial.print(F("  Received packet type "));
-    Serial.println(request.packet_type, HEX);
   }
 
   LifxPacket response;
@@ -592,8 +589,11 @@ void handleRequest(LifxPacket &request) {
 
   default: 
     {
-      if(DEBUG) {
-        Serial.println(F("  Unknown packet type, ignoring"));
+      if (DEBUG) {
+        Serial.print(F("  Unknown packet received of type 0x"));
+        Serial.print(request.packet_type, HEX);
+        Serial.print(" = ");
+        Serial.println(request.packet_type);
       }
     } 
     break;
@@ -613,7 +613,7 @@ unsigned int sendUDPPacket(LifxPacket &pkt) {
   IPAddress remote_addr(Udp.remoteIP());
   IPAddress broadcast_addr(remote_addr[0], remote_addr[1], remote_addr[2], 255);
 
-  if(DEBUG) {
+  if (DEBUG >= 3) {
     Serial.print(F("+UDP "));
     printLifxPacket(pkt);
     Serial.println();
@@ -683,7 +683,7 @@ unsigned int sendUDPPacket(LifxPacket &pkt) {
 
 unsigned int sendTCPPacket(LifxPacket &pkt) { 
 
-  if(DEBUG) {
+  if (DEBUG >= 3) {
     Serial.print(F("+TCP "));
     printLifxPacket(pkt);
     Serial.println();
@@ -850,7 +850,7 @@ void setLight() {
     Serial.print(kel);
     Serial.print(F(", power: "));
     Serial.print(power_status);
-    Serial.println(power_status ? " (on)" : "(off)");
+    Serial.println(power_status ? " (on)" : " (off)");
   }
 
   if(power_status) {
