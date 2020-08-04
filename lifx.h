@@ -22,6 +22,16 @@ const unsigned int LifxProtocol_BulbCommand      = 5120;  // 0x1400
 const unsigned int LifxPacketSize      = 36;
 const unsigned int LifxPort            = 56700;  // local port to listen on
 const unsigned int LifxBulbLabelLength = 32;
+
+#define LIFX_MAGIC_LENGTH 4
+#define LIFX_MAGIC "EL02"
+
+#define LIFX_LABEL_LENGTH 32
+#define LIFX_LABEL_DEFAULT "ESP8266 Lifx"
+
+#define LIFX_WIFI_SSID_LENGTH 32
+#define LIFX_WIFI_PASSWORD_LENGTH 64
+
 const unsigned int LifxBulbTagsLength = 8;
 const unsigned int LifxBulbTagLabelsLength = 32;
 
@@ -74,10 +84,15 @@ const byte MESH_FIRMWARE_STATE = 0x0f;
 #define EEPROM_BULB_TAG_LABELS_START 40 // 32 bytes long
 // future data for EEPROM will start at 72...
 
-#define EEPROM_CONFIG "AL1" // 3 byte identifier for this sketch's EEPROM settings
-#define EEPROM_CONFIG_START 253 // store EEPROM_CONFIG at the end of EEPROM
-
+// EEPROM structure
 #define EEPROM_CONFIG_LEN 256
+
+struct LifxEEPROM {
+  char sMagic[LIFX_MAGIC_LENGTH + 1];
+  char sLabel[LIFX_LABEL_LENGTH + 1];
+  char sSSID[LIFX_WIFI_SSID_LENGTH + 1];
+  char sPassword[LIFX_WIFI_PASSWORD_LENGTH + 1];
+};
 
 // helpers
 #define SPACE " "

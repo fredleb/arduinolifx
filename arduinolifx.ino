@@ -68,6 +68,9 @@ long bri = 65535;
 long kel = 2000;
 long dim = 0;
 
+// Whole config
+LifxEEPROM eeprom;
+
 // Ethernet instances, for UDP broadcasting, and TCP server and client
 WiFiUDP Udp;
 WiFiServer TcpServer = WiFiServer(LifxPort);
@@ -104,84 +107,40 @@ void setup() {
   // read in settings from EEPROM (if they exist) for bulb label and tags
   EEPROM.begin(EEPROM_CONFIG_LEN);
 
-  if(EEPROM.read(EEPROM_CONFIG_START) == EEPROM_CONFIG[0]
-    && EEPROM.read(EEPROM_CONFIG_START+1) == EEPROM_CONFIG[1]
-    && EEPROM.read(EEPROM_CONFIG_START+2) == EEPROM_CONFIG[2]) {
-      if(DEBUG) {
-        Serial.println(F("Config exists in EEPROM, reading..."));
-        Serial.print(F("Bulb label: "));
-      }
-  
-      for(int i = 0; i < LifxBulbLabelLength; i++) {
-        bulbLabel[i] = EEPROM.read(EEPROM_BULB_LABEL_START+i);
-        
-        if(DEBUG) {
-          Serial.print(bulbLabel[i]);
-        }
-      }
-      
-      if(DEBUG) {
-        Serial.println();
-        Serial.print(F("Bulb tags: "));
-      }
-      
-      for(int i = 0; i < LifxBulbTagsLength; i++) {
-        bulbTags[i] = EEPROM.read(EEPROM_BULB_TAGS_START+i);
-        
-        if(DEBUG) {
-          Serial.print(bulbTags[i]);
-        }
-      }
-      
-      if(DEBUG) {
-        Serial.println();
-        Serial.print(F("Bulb tag labels: "));
-      }
-      
-      for(int i = 0; i < LifxBulbTagLabelsLength; i++) {
-        bulbTagLabels[i] = EEPROM.read(EEPROM_BULB_TAG_LABELS_START+i);
-        
-        if(DEBUG) {
-          Serial.print(bulbTagLabels[i]);
-        }
-      }
-      
-      if(DEBUG) {
-        Serial.println();
-        Serial.println(F("Done reading EEPROM config."));
-      }
-  } else {
-    // first time sketch has been run, set defaults into EEPROM
-    if(DEBUG) {
-      Serial.println(F("Config does not exist in EEPROM, writing..."));
-    }
-    
-    EEPROM.write(EEPROM_CONFIG_START, EEPROM_CONFIG[0]);
-    EEPROM.write(EEPROM_CONFIG_START+1, EEPROM_CONFIG[1]);
-    EEPROM.write(EEPROM_CONFIG_START+2, EEPROM_CONFIG[2]);
-    
-    for(int i = 0; i < LifxBulbLabelLength; i++) {
-       EEPROM.write(EEPROM_BULB_LABEL_START+i, bulbLabel[i]);
-    }
-    
-    for(int i = 0; i < LifxBulbTagsLength; i++) {
-      EEPROM.write(EEPROM_BULB_TAGS_START+i, bulbTags[i]);
-    }
-    
-    for(int i = 0; i < LifxBulbTagLabelsLength; i++) {
-      EEPROM.write(EEPROM_BULB_TAG_LABELS_START+i, bulbTagLabels[i]);
-    }
+  eeprom = EEPROM.get(0, eeprom);
 
-    EEPROM.commit();
-      
-    if(DEBUG) {
-      Serial.println(F("Done writing EEPROM config."));
+  if (strncmp(LIFX_MAGIC, eeprom.sMagic, LIFX_MAGIC_LENGTH)) {
+    if (DEBUG) {
+      Serial.println(F("Config in EEPROM is invalid, rewriting..."));
+
+      strncpy(eeprom.sMagic, LIFX_MAGIC, LIFX_MAGIC_LENGTH);
+      eeprom.sMagic[LIFX_MAGIC_LENGTH] = 0;
+
+      strncpy(eeprom.sLabel, LIFX_LABEL_DEFAULT, LIFX_LABEL_LENGTH);
+      eeprom.sLabel[LIFX_LABEL_LENGTH] = 0;
+
+      #ifdef DEFAULT_WIFI_SSID
+        strncpy(eeprom.sSSID, DEFAULT_WIFI_SSID, LIFX_WIFI_SSID_LENGTH);
+        eeprom.sSSID[LIFX_WIFI_SSID_LENGTH] = 0;
+        strncpy(eeprom.sPassword, DEFAULT_WIFI_PASSWORD, LIFX_WIFI_PASSWORD_LENGTH);
+        eeprom.sPassword[LIFX_WIFI_PASSWORD_LENGTH] = 0;
+      #else
+        eeprom.sSSID[0] = 0;
+        eeprom.sPassword[0] = 0;
+      #endif
+
+      EEPROM.put(0, eeprom);
+      EEPROM.commit();
+
+      if (DEBUG) {
+        Serial.println(F("Done writing EEPROM config."));
+      }
     }
   }
   
-  if(DEBUG) {
+  if (DEBUG) {
     Serial.println(F("EEPROM dump:"));
-    for(int i = 0; i < EEPROM_CONFIG_LEN; i++) {
+    for (int i = 0; i < EEPROM_CONFIG_LEN; i++) {
       Serial.print(EEPROM.read(i));
       Serial.print(SPACE);
     }
