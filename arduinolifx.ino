@@ -319,13 +319,32 @@ void handleRequest(LifxPacket &request) {
 
   case SET_LIGHT_STATE: 
     {
-      // set the light colors
-      hue = word(request.data[2], request.data[1]);
-      sat = word(request.data[4], request.data[3]);
-      bri = word(request.data[6], request.data[5]);
-      kel = word(request.data[8], request.data[7]);
+      if (DEBUG >= 2) {
+        Serial.print("Received SET_LIGHT_STATE request");
+      }
 
-      setLight();
+      // set the light colors
+      long new_hue = word(request.data[2], request.data[1]);
+      long new_sat = word(request.data[4], request.data[3]);
+      long new_bri = word(request.data[6], request.data[5]);
+      long new_kel = word(request.data[8], request.data[7]);
+
+      if ((new_hue != hue) ||
+          (new_sat != sat) ||
+          (new_bri != bri) ||
+          (new_kel != kel)) {
+        hue = new_hue;
+        sat = new_sat;
+        bri = new_bri;
+        kel = new_kel;
+
+        if (DEBUG >= 2) Serial.println("");
+
+        setLight(SET_LIGHT_ORIGIN_SET_LIGHT_STATE);
+      } else {
+        if (DEBUG >= 2) Serial.println(" but ignored it");
+      }
+
     } 
     break;
 
