@@ -111,3 +111,26 @@ struct LifxEEPROM {
 
 // helpers
 #define SPACE " "
+
+inline uint16_t reverse16(uint16_t value)
+{
+    return (((value & 0x00FF) << 8) |
+            ((value & 0xFF00) >> 8));
+}
+
+#define LE16 reverse16
+
+// message structures and their answers
+struct Lifx_GET_LIGHT_STATE__ANSWER {
+    uint16 hue;          // LE
+    uint16 saturation;   // LE
+    uint16 brightness;   // LE
+    uint16 kelvin;       // LE
+
+    short reserved0;
+
+    uint16 power;
+    char bulb_label[LIFX_LABEL_LENGTH]; // UTF-8 encoded string
+    uint64 tags;
+};
+
