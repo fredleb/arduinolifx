@@ -21,7 +21,6 @@ const unsigned int LifxProtocol_BulbCommand      = 5120;  // 0x1400
 
 const unsigned int LifxPacketSize      = 36;
 const unsigned int LifxPort            = 56700;  // local port to listen on
-const unsigned int LifxBulbLabelLength = 32;
 
 #define LIFX_MAGIC_LENGTH 4
 #define LIFX_MAGIC "EL02"
