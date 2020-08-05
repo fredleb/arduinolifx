@@ -49,6 +49,12 @@ const byte SERVICE_TCP = 0x02;
 const byte GET_SERVICE = 0x02;
 const byte STATE_SERVICE = 0x03;
 
+const byte GET_HOST_INFO = 0x0C;
+const byte STATE_HOST_INFO = 0x0D;
+
+const byte GET_WIFI_INFO = 0x10;
+const byte STATE_WIFI_INFO = 0x11;
+
 const byte GET_WIFI_FIRMWARE_STATE = 0x12;
 const byte WIFI_FIRMWARE_STATE = 0x13;
 
@@ -70,6 +76,11 @@ const byte BULB_TAGS = 0x1c;
 const byte GET_BULB_TAG_LABELS = 0x1d;
 const byte SET_BULB_TAG_LABELS = 0x1e;
 const byte BULB_TAG_LABELS = 0x1f;
+
+const byte ACKNOWLEDGEMENT = 0x2D;
+
+const byte ECHO_REQUEST = 0x3A;
+const byte ECHO_RESPONSE = 0x3B;
 
 const byte GET_LIGHT_STATE = 0x65;
 const byte SET_LIGHT_STATE = 0x66;
