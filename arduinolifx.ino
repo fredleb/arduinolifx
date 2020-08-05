@@ -241,6 +241,25 @@ void loop() {
   //delay(10);
 }
 
+void sendPowerState(byte cmd) {
+  LifxPacket response;
+
+  switch (cmd) {
+    case GET_POWER_STATE: response.packet_type = POWER_STATE; break;
+    case GET_POWER_STATE2: response.packet_type = POWER_STATE2; break;
+  }
+
+  response.protocol = LifxProtocol_AllBulbsResponse;
+  byte PowerData[] = {
+    lowByte(power_status),
+    highByte(power_status)
+    };
+
+  memcpy(response.data, PowerData, sizeof(PowerData));
+  response.data_size = sizeof(PowerData);
+  sendPacket(response);
+}
+
 void processRequest(byte *packetBuffer, int packetSize, LifxPacket &request) {
 
   request.size        = packetBuffer[0] + (packetBuffer[1] << 8); //little endian
@@ -380,26 +399,50 @@ void handleRequest(LifxPacket &request) {
 
 
   case SET_POWER_STATE:
-  case GET_POWER_STATE: 
+  case SET_POWER_STATE2:
     {
-      // set if we are setting
-      if(request.packet_type == SET_POWER_STATE) {
-        power_status = word(request.data[1], request.data[0]);
-        setLight();
+      if (DEBUG >= 2) {
+        Serial.print("Received SET_POWER_STATE");
+        if (request.packet_type == SET_POWER_STATE2) {
+          Serial.print("2");
+        }
+        Serial.print(" request");
       }
 
-      // respond to both get and set commands
-      response.packet_type = POWER_STATE;
-      response.protocol = LifxProtocol_AllBulbsResponse;
-      byte PowerData[] = { 
-        lowByte(power_status),
-        highByte(power_status)
-        };
+      // set if we are setting
+      uint16 new_power_status = word(request.data[1], request.data[0]);
 
-      memcpy(response.data, PowerData, sizeof(PowerData));
-      response.data_size = sizeof(PowerData);
-      sendPacket(response);
-    } 
+      // uint32 new_duration is ignored for SET_POWER_STATE2
+
+      if (new_power_status != power_status) {
+        if (DEBUG >= 2) Serial.println("");
+        power_status = new_power_status;
+        setLight(SET_LIGHT_ORIGIN_SET_POWER_STATE);
+      } else {
+        if (DEBUG >= 2) Serial.println(" and ignored it");
+      }
+
+      // TODO: only if es_required field is set to one
+      if (request.packet_type == SET_POWER_STATE2) {
+        sendPowerState(request.packet_type);
+      }
+    }
+    break;
+
+
+  case GET_POWER_STATE:
+  case GET_POWER_STATE2:
+    {
+      if (DEBUG >= 2) {
+        Serial.print("Received GET_POWER_STATE");
+        if (request.packet_type == GET_POWER_STATE2) {
+          Serial.print("2");
+        }
+        Serial.print(" request");
+      }
+
+      sendPowerState(request.packet_type);
+    }
     break;
 
 

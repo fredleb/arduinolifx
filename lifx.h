@@ -53,7 +53,7 @@ const byte GET_WIFI_FIRMWARE_STATE = 0x12;
 const byte WIFI_FIRMWARE_STATE = 0x13;
 
 const byte GET_POWER_STATE = 0x14;
-const byte SET_POWER_STATE = 0x75;
+const byte SET_POWER_STATE = 0x15;
 const byte POWER_STATE = 0x16;
 
 const byte GET_BULB_LABEL = 0x17;
@@ -74,6 +74,10 @@ const byte BULB_TAG_LABELS = 0x1f;
 const byte GET_LIGHT_STATE = 0x65;
 const byte SET_LIGHT_STATE = 0x66;
 const byte LIGHT_STATUS = 0x6b;
+
+const byte GET_POWER_STATE2 = 0x74;
+const byte SET_POWER_STATE2 = 0x75;
+const byte POWER_STATE2 = 0x76;
 
 const byte GET_MESH_FIRMWARE_STATE = 0x0e;
 const byte MESH_FIRMWARE_STATE = 0x0f;
