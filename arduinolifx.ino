@@ -570,6 +570,30 @@ void handleRequest(LifxPacket &request) {
     } 
     break;
 
+  case LIGHT_STATUS:
+  case ECHO_RESPONSE:
+  case STATE_SERVICE:
+  case STATE_HOST_INFO:
+  case STATE_WIFI_INFO:
+  case ACKNOWLEDGEMENT:
+    {
+      if (DEBUG >= 3) {
+        Serial.print("Received and ignored ");
+        const char* tag;
+        switch(request.packet_type) {
+          case (LIGHT_STATUS): tag = "LIGHT_STATUS"; break;
+          case (ECHO_RESPONSE): tag = "ECHO_RESPONSE"; break;
+          case (STATE_SERVICE): tag = "STATE_SERVICE"; break;
+          case (STATE_HOST_INFO): tag = "STATE_HOST_INFO"; break;
+          case (STATE_WIFI_INFO): tag = "STATE_WIFI_INFO"; break;
+          case (ACKNOWLEDGEMENT): tag = "ACKNOWLEDGEMENT"; break;
+          default: tag = "!!error!!";
+        }
+        Serial.print(tag);
+        Serial.println(" packet");
+      }
+    }
+    break;
 
   default: 
     {
