@@ -446,70 +446,31 @@ void handleRequest(LifxPacket &request) {
     break;
 
 
-  case SET_BULB_LABEL: 
-  case GET_BULB_LABEL: 
+  case SET_BULB_LABEL:
+  case GET_BULB_LABEL:
     {
+      if (DEBUG >= 2) {
+        Serial.println("Received *_BULB_LABEL request");
+      }
+
       // set if we are setting
       if(request.packet_type == SET_BULB_LABEL) {
+        Serial.println("TODO SET_BULB_LABEL");
+        /*
         for(int i = 0; i < LifxBulbLabelLength; i++) {
           if(bulbLabel[i] != request.data[i]) {
             bulbLabel[i] = request.data[i];
             EEPROM.write(EEPROM_BULB_LABEL_START+i, request.data[i]);
           }
         }
+        */
       }
 
       // respond to both get and set commands
       response.packet_type = BULB_LABEL;
       response.protocol = LifxProtocol_AllBulbsResponse;
-      memcpy(response.data, bulbLabel, sizeof(bulbLabel));
-      response.data_size = sizeof(bulbLabel);
-      sendPacket(response);
-    } 
-    break;
-
-
-  case SET_BULB_TAGS: 
-  case GET_BULB_TAGS: 
-    {
-      // set if we are setting
-      if(request.packet_type == SET_BULB_TAGS) {
-        for(int i = 0; i < LifxBulbTagsLength; i++) {
-          if(bulbTags[i] != request.data[i]) {
-            bulbTags[i] = lowByte(request.data[i]);
-            EEPROM.write(EEPROM_BULB_TAGS_START+i, request.data[i]);
-          }
-        }
-      }
-
-      // respond to both get and set commands
-      response.packet_type = BULB_TAGS;
-      response.protocol = LifxProtocol_AllBulbsResponse;
-      memcpy(response.data, bulbTags, sizeof(bulbTags));
-      response.data_size = sizeof(bulbTags);
-      sendPacket(response);
-    } 
-    break;
-
-
-  case SET_BULB_TAG_LABELS: 
-  case GET_BULB_TAG_LABELS: 
-    {
-      // set if we are setting
-      if(request.packet_type == SET_BULB_TAG_LABELS) {
-        for(int i = 0; i < LifxBulbTagLabelsLength; i++) {
-          if(bulbTagLabels[i] != request.data[i]) {
-            bulbTagLabels[i] = request.data[i];
-            EEPROM.write(EEPROM_BULB_TAG_LABELS_START+i, request.data[i]);
-          }
-        }
-      }
-
-      // respond to both get and set commands
-      response.packet_type = BULB_TAG_LABELS;
-      response.protocol = LifxProtocol_AllBulbsResponse;
-      memcpy(response.data, bulbTagLabels, sizeof(bulbTagLabels));
-      response.data_size = sizeof(bulbTagLabels);
+      memcpy(response.data, eeprom.sLabel, sizeof(LIFX_LABEL_LENGTH));
+      response.data_size = sizeof(LIFX_LABEL_LENGTH);
       sendPacket(response);
     } 
     break;
