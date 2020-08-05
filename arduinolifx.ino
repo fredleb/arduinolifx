@@ -293,8 +293,6 @@ void processRequest(byte *packetBuffer, int packetSize, LifxPacket &request) {
 }
 
 void handleRequest(LifxPacket &request) {
-  }
-
   LifxPacket response;
   switch(request.packet_type) {
 
