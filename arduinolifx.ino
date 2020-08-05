@@ -296,12 +296,16 @@ void handleRequest(LifxPacket &request) {
   LifxPacket response;
   switch(request.packet_type) {
 
-  case GET_PAN_GATEWAY: 
+  case GET_SERVICE:
     {
+      if (DEBUG >= 2) {
+        Serial.println("Received GET_SERVICE request");
+      }
+
       // we are a gateway, so respond to this
 
       // respond with the UDP port
-      response.packet_type = PAN_GATEWAY;
+      response.packet_type = STATE_SERVICE;
       response.protocol = LifxProtocol_AllBulbsResponse;
       byte UDPdata[] = { 
         SERVICE_UDP, //UDP

@@ -46,8 +46,8 @@ const byte SERVICE_UDP = 0x01;
 const byte SERVICE_TCP = 0x02;
 
 // packet types
-const byte GET_PAN_GATEWAY = 0x02;
-const byte PAN_GATEWAY = 0x03;
+const byte GET_SERVICE = 0x02;
+const byte STATE_SERVICE = 0x03;
 
 const byte GET_WIFI_FIRMWARE_STATE = 0x12;
 const byte WIFI_FIRMWARE_STATE = 0x13;
