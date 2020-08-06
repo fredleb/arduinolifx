@@ -52,9 +52,6 @@ const int redPin = 3;
 const int greenPin = 5;
 const int bluePin = 6;
 
-// label (name) for this bulb
-char bulbLabel[LifxBulbLabelLength] = "Arduino Bulb";
-
 // tags for this bulb
 char bulbTags[LifxBulbTagsLength] = {
   0,0,0,0,0,0,0,0};
