@@ -29,7 +29,6 @@
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <WiFiUdp.h>
-#include <WiFiManager.h>
 
 #include "lifx.h"
 #include "RGBMoodLifx.h"
