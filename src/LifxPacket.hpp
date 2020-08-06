@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#if 0
 struct LifxPacket_old {
   uint16_t size; //little endian
   uint16_t protocol; //little endian
@@ -15,7 +16,13 @@ struct LifxPacket_old {
   byte data[128];
   int data_size;
 };
+#endif
 
+/**
+ * Lifx Frame structure
+ * 
+ * @see https://lan.developer.lifx.com/docs/header-description#frame
+ */
 struct LifxFrame {
     uint16_t size;
     union {
@@ -30,6 +37,11 @@ struct LifxFrame {
     uint32_t source;
 };
 
+/**
+ * Lifx frame address structure
+ * 
+ * @see https://lan.developer.lifx.com/docs/header-description#frame-address
+ */
 struct LifxFrameAddress {
     uint8_t target[8];
     uint8_t reserved0[6];
@@ -39,6 +51,11 @@ struct LifxFrameAddress {
     uint8_t sequence;
 };
 
+/**
+ * Lifx protocol header structure
+ * 
+ * @see https://lan.developer.lifx.com/docs/header-description#protocol-header
+ */
 #pragma pack(push, 1)
 struct LifxProtocolHeader {
     uint64_t reserved0;
@@ -57,6 +74,12 @@ struct LifxPacket {
     void init();
 };
 
+/**
+ * Wrapper around the Lifx packet structure
+ * 
+ * This wrapper allows easier manipulation of the packet,
+ * both incoming and outgoing.
+ */
 class LifxPacketWrapper {
     protected:
         LifxPacket* packet;
