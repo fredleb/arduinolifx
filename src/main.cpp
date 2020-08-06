@@ -729,37 +729,36 @@ void setup() {
   if (strncmp(LIFX_MAGIC, eeprom.sMagic, LIFX_MAGIC_LENGTH)) {
     if (DEBUG) {
       Serial.println(F("Config in EEPROM is invalid, rewriting..."));
+    }
 
-      strncpy(eeprom.sMagic, LIFX_MAGIC, LIFX_MAGIC_LENGTH);
-      eeprom.sMagic[LIFX_MAGIC_LENGTH] = 0;
+    strncpy(eeprom.sMagic, LIFX_MAGIC, LIFX_MAGIC_LENGTH);
+    eeprom.sMagic[LIFX_MAGIC_LENGTH] = 0;
 
-      strncpy(eeprom.sLabel, LIFX_LABEL_DEFAULT, LIFX_LABEL_LENGTH);
-      eeprom.sLabel[LIFX_LABEL_LENGTH] = 0;
+    strncpy(eeprom.sLabel, LIFX_LABEL_DEFAULT, LIFX_LABEL_LENGTH);
+    eeprom.sLabel[LIFX_LABEL_LENGTH] = 0;
 
-      #ifdef DEFAULT_WIFI_SSID
-        strncpy(eeprom.sSSID, DEFAULT_WIFI_SSID, LIFX_WIFI_SSID_LENGTH);
-        eeprom.sSSID[LIFX_WIFI_SSID_LENGTH] = 0;
-        strncpy(eeprom.sPassword, DEFAULT_WIFI_PASSWORD, LIFX_WIFI_PASSWORD_LENGTH);
-        eeprom.sPassword[LIFX_WIFI_PASSWORD_LENGTH] = 0;
-      #else
-        eeprom.sSSID[0] = 0;
-        eeprom.sPassword[0] = 0;
-      #endif
+    #ifdef DEFAULT_WIFI_SSID
+      strncpy(eeprom.sSSID, DEFAULT_WIFI_SSID, LIFX_WIFI_SSID_LENGTH);
+      eeprom.sSSID[LIFX_WIFI_SSID_LENGTH] = 0;
+      strncpy(eeprom.sPassword, DEFAULT_WIFI_PASSWORD, LIFX_WIFI_PASSWORD_LENGTH);
+      eeprom.sPassword[LIFX_WIFI_PASSWORD_LENGTH] = 0;
+    #else
+      eeprom.sSSID[0] = 0;
+      eeprom.sPassword[0] = 0;
+    #endif
 
-      EEPROM.put(0, eeprom);
-      EEPROM.commit();
+    EEPROM.put(0, eeprom);
+    EEPROM.commit();
 
-      if (DEBUG) {
-        Serial.println(F("Done writing EEPROM config."));
-      }
+    if (DEBUG) {
+      Serial.println(F("Done writing EEPROM config."));
     }
   }
   
   if (DEBUG) {
     Serial.println(F("EEPROM dump:"));
     for (int i = 0; i < EEPROM_CONFIG_LEN; i++) {
-      Serial.print(EEPROM.read(i));
-      Serial.print(SPACE);
+      Serial.printf("%02X ", EEPROM.read(i));
     }
     Serial.println();
   }
