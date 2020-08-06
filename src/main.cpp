@@ -218,7 +218,7 @@ unsigned int sendUDPPacket(LifxPacket &pkt) {
   IPAddress broadcast_addr(remote_addr[0], remote_addr[1], remote_addr[2], 255);
 
   if (DEBUG >= 3) {
-    Serial.print(F("+UDP "));
+    Serial.print(F("<UDP "));
     printLifxPacket(pkt);
     Serial.println();
   }
@@ -852,7 +852,7 @@ void loop() {
       LifxPacketWrapper request(buffer);
 
       if (DEBUG >= 3) {
-        Serial.print(F("-UDP "));
+        Serial.print(F(">UDP "));
         request.dump();
         Serial.println();
       }
