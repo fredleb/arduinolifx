@@ -839,30 +839,26 @@ void loop() {
 
   // if there's UDP data available, read a packet
   int packetSize = Udp.parsePacket();
-  if(packetSize) {
-    Udp.read(PacketBuffer, 128);
+  if (packetSize) {
+    //Serial.printf("Reading %i bytes from UDP\n", packetSize);
+    byte* buffer = (byte*) malloc(packetSize);
+    int size = Udp.read(buffer, packetSize);
+    if (size != packetSize) {
+      Serial.printf("FATAL: read only %i of %i\n", size, packetSize);
+      //abort();
+    } else {
 
-    if (DEBUG >= 3) {
-      Serial.print(F("-UDP "));
-      for(int i = 0; i < LifxPacketSize; i++) {
-        Serial.print(PacketBuffer[i], HEX);
-        Serial.print(SPACE);
+      // wrap it up
+      LifxPacketWrapper request(buffer);
+
+      if (DEBUG >= 3) {
+        Serial.print(F("-UDP "));
+        request.dump();
+        Serial.println();
       }
 
-      for(int i = LifxPacketSize; i < packetSize; i++) {
-        Serial.print(PacketBuffer[i], HEX);
-        Serial.print(SPACE);
-      }
-      Serial.println();
     }
-
-    // push the data into the LifxPacket structure
-    LifxPacket request;
-    processRequest(PacketBuffer, sizeof(PacketBuffer), request);
-
-    //respond to the request
-    handleRequest(request);
-
+    free(buffer);
   }
 
   //Ethernet.maintain();
