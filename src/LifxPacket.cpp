@@ -1,6 +1,9 @@
 #include "LifxPacket.hpp"
 #include "util.h"
 
+// Here you can tweak the boolean answer to make them more visible in the output.
+#define DISPLAY_BOOLEAN(x) ((x) ? "Y" : "_")
+
 void LifxPacket::init() {
     frame.protocol = htons(1024U);
     frame.addressable = 1;
@@ -43,7 +46,7 @@ void LifxPacketWrapper::dump() {
         // protocol (always the same so don't print)
         //Serial.printf(", protocol %i", packet->frame.protocol);
             // TODO ? ignored field
-        Serial.printf(", tagged %s", packet->frame.tagged ? "1" : "0");
+        Serial.printf(", tagged %s", DISPLAY_BOOLEAN(packet->frame.tagged));
             // TODO ? ignored field
         Serial.printf(", source 0x%08X", packet->frame.source);
 
@@ -53,8 +56,8 @@ void LifxPacketWrapper::dump() {
             Serial.printf(" %02X", lowByte(packet->frameAddress.target[i]));
         }
 
-        Serial.printf(", res_required %s", packet->frameAddress.res_required ? "1" : "0");
-        Serial.printf(", ack_required %s", packet->frameAddress.ack_required ? "1" : "0");
+        Serial.printf(", res_required %s", DISPLAY_BOOLEAN(packet->frameAddress.res_required));
+        Serial.printf(", ack_required %s", DISPLAY_BOOLEAN(packet->frameAddress.ack_required));
         Serial.printf(", sequence %i", packet->frameAddress.sequence);
 
         Serial.printf(", type %i", packet->protocolHeader.type);
