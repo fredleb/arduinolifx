@@ -316,7 +316,7 @@ void handleRequest(LifxPacket &request) {
       sendPacket(response);
 
       // respond with the TCP port details
-      response.packet_type = PAN_GATEWAY;
+      response.packet_type = STATE_SERVICE;
       response.protocol = LifxProtocol_AllBulbsResponse;
       byte TCPdata[] = { 
         SERVICE_TCP, //TCP
