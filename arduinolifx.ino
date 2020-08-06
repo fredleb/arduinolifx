@@ -163,7 +163,7 @@ void setup() {
   }
 
   // set the bulb based on the initial colors
-  setLight();
+  setLight(SET_LIGHT_ORIGIN_SETUP);
 }
 
 void loop() {
@@ -843,9 +843,13 @@ void printLifxPacket(LifxPacket &pkt) {
   }
 }
 
-void setLight() {
-  if(DEBUG) {
+void setLight(int origin) {
+  if (DEBUG) {
     Serial.print(F("Set light - "));
+    Serial.print(" origin: ");
+    Serial.print(origin);
+    Serial.print(" - ");
+
     Serial.print(F("hue: "));
     Serial.print(hue);
     Serial.print(F(", sat: "));
