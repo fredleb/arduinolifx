@@ -32,6 +32,7 @@
 #include <WiFiUdp.h>
 
 #include "lifx.h"
+#include "LifxPacket.hpp"
 #include "RGBMoodLifx.h"
 #include "color.h"
 
