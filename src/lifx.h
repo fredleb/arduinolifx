@@ -92,16 +92,6 @@ struct LifxEEPROM {
   char sPassword[LIFX_WIFI_PASSWORD_LENGTH + 1];
 };
 
-// helpers
-#define SPACE " "
-
-inline uint16_t reverse16(uint16_t value)
-{
-    return (((value & 0x00FF) << 8) |
-            ((value & 0xFF00) >> 8));
-}
-
-#define LE16 reverse16
 
 // message structures and their answers
 struct Lifx_GET_LIGHT_STATE__ANSWER {
