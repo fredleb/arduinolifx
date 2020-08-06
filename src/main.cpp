@@ -706,39 +706,6 @@ void handleRequest(LifxPacket &request) {
 }
 
 
-void processRequest(byte *packetBuffer, int packetSize, LifxPacket &request) {
-
-  request.size        = packetBuffer[0] + (packetBuffer[1] << 8); //little endian
-  request.protocol    = packetBuffer[2] + (packetBuffer[3] << 8); //little endian
-  request.reserved1   = packetBuffer[4] + packetBuffer[5] + packetBuffer[6] + packetBuffer[7];
-
-  byte bulbAddress[] = { 
-    packetBuffer[8], packetBuffer[9], packetBuffer[10], packetBuffer[11], packetBuffer[12], packetBuffer[13]       
-  };
-  memcpy(request.bulbAddress, bulbAddress, 6);
-
-  request.reserved2   = packetBuffer[14] + packetBuffer[15];
-
-  byte site[] = { 
-    packetBuffer[16], packetBuffer[17], packetBuffer[18], packetBuffer[19], packetBuffer[20], packetBuffer[21]       
-  };
-  memcpy(request.site, site, 6);
-
-  request.reserved3   = packetBuffer[22] + packetBuffer[23];
-  request.timestamp   = packetBuffer[24] + packetBuffer[25] + packetBuffer[26] + packetBuffer[27] + 
-    packetBuffer[28] + packetBuffer[29] + packetBuffer[30] + packetBuffer[31];
-  request.packet_type = packetBuffer[32] + (packetBuffer[33] << 8); //little endian
-  request.reserved4   = packetBuffer[34] + packetBuffer[35];
-
-  int i;
-  for(i = LifxPacketSize; i < packetSize; i++) {
-    request.data[i-LifxPacketSize] = packetBuffer[i];
-  }
-
-  request.data_size = i;
-}
-
-
 // Standard arduino functions
 
 void setup() {
