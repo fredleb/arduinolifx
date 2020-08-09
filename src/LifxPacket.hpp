@@ -150,4 +150,18 @@ class LifxPacketWrapper {
         
 };
 
+class LifxHandler {
+    protected:
+        WiFiUDP wifiUDP;
+        LifxPacketWrapper* pRequest;
+        byte local_mac[WL_MAC_ADDR_LENGTH];
+
+    public :
+        LifxHandler(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : 
+            wifiUDP(Udp),
+            pRequest{incoming} {
+                memcpy(local_mac, mac, sizeof(mac)/sizeof(mac[0]));
+            };
+
+        virtual void handle() = 0;
 };
