@@ -197,6 +197,7 @@ class LifxPacketWrapper {
         
 };
 
+template <typename TResponse>
 class LifxHandler {
     protected:
         WiFiUDP wifiUDP;
@@ -207,14 +208,26 @@ class LifxHandler {
         LifxHandler(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : 
             wifiUDP(Udp),
             pRequest{incoming} {
-                memcpy(local_mac, mac, WL_MAC_ADDR_LENGTH);
-            };
+            memcpy(local_mac, mac, WL_MAC_ADDR_LENGTH);
+        };
 
-        virtual void handle() = 0;
+        void handle(LifxPacketType::Code code, std::function<void(TResponse* pResponse)> data_fill) {
+            size_t packetLen = LifxPacketWrapper::getResponseSize(sizeof(TResponse));
+            byte* buffer = (byte*)malloc(packetLen);
+            LifxPacketWrapper response(buffer);
+            response.initResponse(pRequest, local_mac, code, sizeof(TResponse));
+
+            TResponse* pState = (TResponse*) response.getPayload();
+            data_fill(pState);
+
+            response.sendUDP(wifiUDP);
+            free(buffer);
+        };
 };
 
-class LifxHandlerService : public LifxHandler {
-    private:
+class LifxResponse {
+    public:
+
         static uint8_t const service_UDP = 1; // @see https://lan.developer.lifx.com/docs/device-messages#section-service
 
         /**
@@ -228,14 +241,6 @@ class LifxHandlerService : public LifxHandler {
             uint32_t port;
         };
         #pragma pack(pop)
-
-    public:
-        LifxHandlerService(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : LifxHandler(mac, Udp, incoming) {};
-        void handle();
-};
-
-class LifxHandlerHostFirmware : public LifxHandler {
-    private:
 
         /**
          * Response structure
@@ -251,14 +256,6 @@ class LifxHandlerHostFirmware : public LifxHandler {
         };
         #pragma pack(pop)
 
-    public:
-        LifxHandlerHostFirmware(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : LifxHandler(mac, Udp, incoming) {};
-        void handle();
-};
-
-class LifxHandlerWifiFirmware : public LifxHandler {
-    private:
-
         /**
          * Response structure
          * 
@@ -273,14 +270,6 @@ class LifxHandlerWifiFirmware : public LifxHandler {
         };
         #pragma pack(pop)
 
-    public:
-        LifxHandlerWifiFirmware(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : LifxHandler(mac, Udp, incoming) {};
-        void handle();
-};
-
-class LifxHandlerLabel : public LifxHandler {
-    private:
-
         /**
          * Response structure
          * 
@@ -291,14 +280,6 @@ class LifxHandlerLabel : public LifxHandler {
             char label[LIFX_LABEL_LENGTH];
         };
         #pragma pack(pop)
-
-    public:
-        LifxHandlerLabel(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : LifxHandler(mac, Udp, incoming) {};
-        void handle();
-};
-
-class LifxHandlerVersion : public LifxHandler {
-    private:
 
         /**
          * Response structure
@@ -312,8 +293,4 @@ class LifxHandlerVersion : public LifxHandler {
             uint32_t version;
         };
         #pragma pack(pop)
-
-    public:
-        LifxHandlerVersion(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : LifxHandler(mac, Udp, incoming) {};
-        void handle();
 };

@@ -141,102 +141,51 @@ void LifxPacketWrapper::handle(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp) {
         }
     }
 
-    switch(getType()) {
+    switch (getType()) {
         case (LifxPacketType::Code::GET_SERVICE) : {
-            LifxHandlerService handler(mac, Udp, this);
-            handler.handle();
+            LifxHandler<LifxResponse::LifxServiceState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_SERVICE, [](LifxResponse::LifxServiceState * pState) {
+                    pState->port = LIFX_PORT;
+                    pState->service = LifxResponse::service_UDP;
+                } );
         } break;
 
         case (LifxPacketType::Code::GET_HOST_FIRMWARE) : {
-            LifxHandlerHostFirmware handler(mac, Udp, this);
-            handler.handle();
+            LifxHandler<LifxResponse::LifxHostFirmwareState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_HOST_FIRMWARE, [](LifxResponse::LifxHostFirmwareState * pState) {
+                    pState->build = 0;
+                    pState->version_minor = 1;
+                    pState->version_major = 2;
+                } );
         } break;
 
         case (LifxPacketType::Code::GET_WIFI_FIRMWARE) : {
-            LifxHandlerWifiFirmware handler(mac, Udp, this);
-            handler.handle();
+            LifxHandler<LifxResponse::LifxWifiFirmwareState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_WIFI_FIRMWARE, [](LifxResponse::LifxWifiFirmwareState * pState) {
+                    pState->build = 0;
+                    pState->version_minor = 1;
+                    pState->version_major = 2;
+                } );
         } break;
 
         case (LifxPacketType::Code::GET_LABEL) : {
-            LifxHandlerLabel handler(mac, Udp, this);
-            handler.handle();
+            LifxHandler<LifxResponse::LifxLabelState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_LABEL, [](LifxResponse::LifxLabelState * pState) {
+                memcpy(pState->label, eeprom.sLabel, LIFX_LABEL_LENGTH);
+            } );
         } break;
 
         case (LifxPacketType::Code::GET_VERSION) : {
-            LifxHandlerVersion handler(mac, Udp, this);
-            handler.handle();
+            LifxHandler<LifxResponse::LifxVersionState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_VERSION, [](LifxResponse::LifxVersionState * pState) {
+                    pState->vendor = 1;
+                    pState->product = 1;
+                    pState->version = 1;
+            } );
         } break;
+
+        default : {
+            Serial.printf("\nERROR: not handled type 0x%04X = %i\n", getType(), getType());
+        }
     }
-}
-
-void LifxHandlerService::handle() {
-    size_t packetLen = LifxPacketWrapper::getResponseSize(sizeof(LifxServiceState));
-    byte* buffer = (byte*)malloc(packetLen);
-    LifxPacketWrapper response(buffer);
-    response.initResponse(pRequest, local_mac, LifxPacketType::Code::STATE_SERVICE, sizeof(LifxServiceState));
-
-    LifxServiceState* pState = (LifxServiceState*) response.getPayload();
-    pState->port = LIFX_PORT;
-    pState->service = service_UDP;
-
-    response.sendUDP(wifiUDP);
-    free(buffer);
-}
-
-void LifxHandlerHostFirmware::handle() {
-    size_t packetLen = LifxPacketWrapper::getResponseSize(sizeof(LifxHostFirmwareState));
-    byte* buffer = (byte*)malloc(packetLen);
-    LifxPacketWrapper response(buffer);
-    response.initResponse(pRequest, local_mac, LifxPacketType::Code::STATE_HOST_FIRMWARE, sizeof(LifxHostFirmwareState));
-
-    LifxHostFirmwareState* pState = (LifxHostFirmwareState*) response.getPayload();
-    pState->build = 0;
-    pState->version_minor = 1;
-    pState->version_major = 2;
-
-    response.sendUDP(wifiUDP);
-    free(buffer);
-}
-
-void LifxHandlerWifiFirmware::handle() {
-    size_t packetLen = LifxPacketWrapper::getResponseSize(sizeof(LifxWifiFirmwareState));
-    byte* buffer = (byte*)malloc(packetLen);
-    LifxPacketWrapper response(buffer);
-    response.initResponse(pRequest, local_mac, LifxPacketType::Code::STATE_WIFI_FIRMWARE, sizeof(LifxWifiFirmwareState));
-
-    LifxWifiFirmwareState* pState = (LifxWifiFirmwareState*) response.getPayload();
-    pState->build = 0;
-    pState->version_minor = 1;
-    pState->version_major = 2;
-
-    response.sendUDP(wifiUDP);
-    free(buffer);
-}
-
-void LifxHandlerLabel::handle() {
-    size_t packetLen = LifxPacketWrapper::getResponseSize(sizeof(LifxLabelState));
-    byte* buffer = (byte*)malloc(packetLen);
-    LifxPacketWrapper response(buffer);
-    response.initResponse(pRequest, local_mac, LifxPacketType::Code::STATE_LABEL, sizeof(LifxLabelState));
-
-    LifxLabelState* pState = (LifxLabelState*) response.getPayload();
-    memcpy(pState->label, eeprom.sLabel, LIFX_LABEL_LENGTH);
-
-    response.sendUDP(wifiUDP);
-    free(buffer);
-}
-
-void LifxHandlerVersion::handle() {
-    size_t packetLen = LifxPacketWrapper::getResponseSize(sizeof(LifxVersionState));
-    byte* buffer = (byte*)malloc(packetLen);
-    LifxPacketWrapper response(buffer);
-    response.initResponse(pRequest, local_mac, LifxPacketType::Code::STATE_VERSION, sizeof(LifxVersionState));
-
-    LifxVersionState* pState = (LifxVersionState*) response.getPayload();
-    pState->vendor = 1;
-    pState->product = 1;
-    pState->version = 1;
-
-    response.sendUDP(wifiUDP);
-    free(buffer);
 }
