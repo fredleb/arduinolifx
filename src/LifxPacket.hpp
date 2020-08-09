@@ -14,6 +14,7 @@
  * 
  * @see https://lan.developer.lifx.com/docs/header-description#frame
  */
+#pragma pack(push, 1)
 struct LifxFrame {
     uint16_t size;
     union {
@@ -27,12 +28,14 @@ struct LifxFrame {
     };
     uint32_t source;
 };
+#pragma pack(pop)
 
 /**
  * Lifx frame address structure
  * 
  * @see https://lan.developer.lifx.com/docs/header-description#frame-address
  */
+#pragma pack(push, 1)
 struct LifxFrameAddress {
     uint8_t target[8];
     uint8_t reserved0[6];
@@ -41,6 +44,7 @@ struct LifxFrameAddress {
     uint8_t reserved1 : 6;
     uint8_t sequence;
 };
+#pragma pack(pop)
 
 /**
  * Lifx protocol header structure
@@ -55,6 +59,7 @@ struct LifxProtocolHeader {
 };
 #pragma pack(pop)
 
+#pragma pack(push, 1)
 struct LifxPacket {
     // Always stored in network endian
     LifxFrame frame;
@@ -64,6 +69,7 @@ struct LifxPacket {
     // Setters
     void init();
 };
+#pragma pack(pop)
 
 
 #define CODE_TO_STR(code) case (code) : return #code
