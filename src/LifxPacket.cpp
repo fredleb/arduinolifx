@@ -40,7 +40,7 @@ LifxPacketType::Code LifxPacketWrapper::getType() {
 
 void LifxPacketWrapper::dump() {
     if (packet == NULL) {
-        Serial.println("! Packet buffer is not allocated !");
+        Serial.printf("! Packet buffer is not allocated !\n");
     } else {
         // size
         Serial.printf("size %i", getSize());
@@ -53,7 +53,7 @@ void LifxPacketWrapper::dump() {
         Serial.printf(", source 0x%08X", packet->frame.source);
 
         // bulbAddress mac address
-        Serial.print(", target");
+        Serial.printf(", target");
         for (int i = 0; i < sizeof(packet->frameAddress.target); i++) {
             Serial.printf(" %02X", lowByte(packet->frameAddress.target[i]));
         }
