@@ -166,7 +166,7 @@ class LifxHandler {
         LifxHandler(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : 
             wifiUDP(Udp),
             pRequest{incoming} {
-                memcpy(local_mac, mac, sizeof(mac)/sizeof(mac[0]));
+                memcpy(local_mac, mac, WL_MAC_ADDR_LENGTH);
             };
 
         virtual void handle() = 0;

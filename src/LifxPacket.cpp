@@ -5,11 +5,10 @@
 #define DISPLAY_BOOLEAN(x) ((x) ? "Y" : "_")
 
 void LifxPacket::init() {
+    memset(this, 0, sizeof(LifxPacket));
+
     frame.protocol = 1024U;
     frame.addressable = 1;
-    frame.origin = 0;
-
-    memset(frameAddress.reserved0, 0, sizeof(frameAddress.reserved0));
 }
 
 LifxPacketWrapper::LifxPacketWrapper(byte* buffer) {
@@ -130,11 +129,7 @@ void LifxPacketWrapper::initResponse(LifxPacketWrapper* pRequest, byte mac[WL_MA
     packet->frameAddress.sequence = pRequest->getSequence();
     packet->protocolHeader.type = (uint16_t)code;
 
-    memcpy(packet->frameAddress.target, mac, sizeof(mac)/sizeof(mac[0]));
-    
-    // Ugly but will do for now
-    packet->frameAddress.target[WL_MAC_ADDR_LENGTH] = 0;
-    packet->frameAddress.target[WL_MAC_ADDR_LENGTH+1] = 0;
+    memcpy(packet->frameAddress.target, mac, WL_MAC_ADDR_LENGTH);
 }
 
 void LifxPacketWrapper::handle(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp) {
