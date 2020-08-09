@@ -165,3 +165,24 @@ class LifxHandler {
 
         virtual void handle() = 0;
 };
+
+class LifxHandlerService : public LifxHandler {
+    private:
+        static uint8_t const service_UDP = 1; // @see https://lan.developer.lifx.com/docs/device-messages#section-service
+
+        /**
+         * Response structure
+         * 
+         * @see https://lan.developer.lifx.com/docs/device-messages#section-stateservice-3
+         */
+        #pragma pack(push, 1)
+        struct LifxServiceState {
+            uint8_t service;
+            uint32_t port;
+        };
+        #pragma pack(pop)
+
+    public:
+        LifxHandlerService(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : LifxHandler(mac, Udp, incoming) {};
+        void handle();
+};

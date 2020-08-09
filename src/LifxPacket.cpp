@@ -145,4 +145,26 @@ void LifxPacketWrapper::handle(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp) {
             Serial.println();
         }
     }
+
+    switch(getType()) {
+        case (LifxPacketType::Code::GET_SERVICE) : {
+            LifxHandlerService handler(mac, Udp, this);
+            handler.handle();
+        } break;
+
+    }
+}
+
+void LifxHandlerService::handle() {
+    size_t packetLen = LifxPacketWrapper::getResponseSize(sizeof(LifxServiceState));
+    byte* buffer = (byte*)malloc(packetLen);
+    LifxPacketWrapper response(buffer);
+    response.initResponse(pRequest, local_mac, LifxPacketType::Code::STATE_SERVICE, sizeof(LifxServiceState));
+
+    LifxServiceState* pServiceState = (LifxServiceState*) response.getPayload();
+    pServiceState->port = LIFX_PORT;
+    pServiceState->service = service_UDP;
+
+    response.sendUDP(wifiUDP);
+    free(buffer);
 }
