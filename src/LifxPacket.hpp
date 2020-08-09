@@ -1,4 +1,7 @@
 #include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
+#include <lifx.h>
 
 #define LOG_OFF 0
 #define LOG_FATAL 1
@@ -8,6 +11,10 @@
 #define LOG_DEBUG 5
 #define LOG_TRACE 6
 #define LOG_ALL 7
+
+#define LIFX_PORT 56700
+
+extern LifxEEPROM eeprom;
 
 /**
  * Lifx Frame structure
@@ -82,6 +89,21 @@ struct LifxPacketType {
         GET_SERVICE = 2,
         STATE_SERVICE = 3,
 
+        STATE_HOST_INFO = 13,
+        GET_HOST_FIRMWARE = 14,
+        STATE_HOST_FIRMWARE = 15,
+
+        STATE_WIFI_INFO = 17,
+        GET_WIFI_FIRMWARE = 18,
+        STATE_WIFI_FIRMWARE = 19,
+
+        GET_LABEL = 23,
+        SET_LABEL = 24,
+        STATE_LABEL = 25,
+
+        GET_VERSION = 32,
+        STATE_VERSION = 33,
+
         STATE_GROUP = 53,
 
         ECHO_RESPONSE = 59,
@@ -95,6 +117,21 @@ struct LifxPacketType {
 
             CODE_TO_STR(GET_SERVICE);
             CODE_TO_STR(STATE_SERVICE);
+
+            CODE_TO_STR(STATE_HOST_INFO);
+            CODE_TO_STR(GET_HOST_FIRMWARE);
+            CODE_TO_STR(STATE_HOST_FIRMWARE);
+
+            CODE_TO_STR(STATE_WIFI_INFO);
+            CODE_TO_STR(GET_WIFI_FIRMWARE);
+            CODE_TO_STR(STATE_WIFI_FIRMWARE);
+
+            CODE_TO_STR(GET_LABEL);
+            CODE_TO_STR(SET_LABEL);
+            CODE_TO_STR(STATE_LABEL);
+
+            CODE_TO_STR(GET_VERSION);
+            CODE_TO_STR(STATE_VERSION);
 
             CODE_TO_STR(STATE_GROUP);
 
@@ -112,6 +149,10 @@ struct LifxPacketType {
     static boolean isRequest(Code code) {
         switch(code) {
             case (GET_SERVICE):
+            case (GET_WIFI_FIRMWARE):
+            case (GET_HOST_FIRMWARE):
+            case (GET_LABEL):
+            case (SET_LABEL):
 
                 return true;
 
@@ -190,5 +231,89 @@ class LifxHandlerService : public LifxHandler {
 
     public:
         LifxHandlerService(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : LifxHandler(mac, Udp, incoming) {};
+        void handle();
+};
+
+class LifxHandlerHostFirmware : public LifxHandler {
+    private:
+
+        /**
+         * Response structure
+         * 
+         * @see https://lan.developer.lifx.com/docs/device-messages#section-statehostfirmware-15
+         */
+        #pragma pack(push, 1)
+        struct LifxHostFirmwareState {
+            uint64_t build;
+            uint64_t reserved;
+            uint16_t version_minor;
+            uint16_t version_major;
+        };
+        #pragma pack(pop)
+
+    public:
+        LifxHandlerHostFirmware(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : LifxHandler(mac, Udp, incoming) {};
+        void handle();
+};
+
+class LifxHandlerWifiFirmware : public LifxHandler {
+    private:
+
+        /**
+         * Response structure
+         * 
+         * @see https://lan.developer.lifx.com/docs/device-messages#section-statewififirmware-19
+         */
+        #pragma pack(push, 1)
+        struct LifxWifiFirmwareState {
+            uint64_t build;
+            uint64_t reserved;
+            uint16_t version_minor;
+            uint16_t version_major;
+        };
+        #pragma pack(pop)
+
+    public:
+        LifxHandlerWifiFirmware(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : LifxHandler(mac, Udp, incoming) {};
+        void handle();
+};
+
+class LifxHandlerLabel : public LifxHandler {
+    private:
+
+        /**
+         * Response structure
+         * 
+         * @see https://lan.developer.lifx.com/docs/device-messages#section-statelabel-25
+         */
+        #pragma pack(push, 1)
+        struct LifxLabelState {
+            char label[LIFX_LABEL_LENGTH];
+        };
+        #pragma pack(pop)
+
+    public:
+        LifxHandlerLabel(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : LifxHandler(mac, Udp, incoming) {};
+        void handle();
+};
+
+class LifxHandlerVersion : public LifxHandler {
+    private:
+
+        /**
+         * Response structure
+         * 
+         * @see https://lan.developer.lifx.com/docs/device-messages#section-stateversion-33
+         */
+        #pragma pack(push, 1)
+        struct LifxVersionState {
+            uint32_t vendor;
+            uint32_t product;
+            uint32_t version;
+        };
+        #pragma pack(pop)
+
+    public:
+        LifxHandlerVersion(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp, LifxPacketWrapper* incoming) : LifxHandler(mac, Udp, incoming) {};
         void handle();
 };
