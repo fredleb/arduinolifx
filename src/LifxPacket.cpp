@@ -34,6 +34,44 @@ LifxPacketType::Code LifxPacketWrapper::getType() {
     return LifxPacketType::Code::INVALID;
 }
 
+void* LifxPacketWrapper::getPayload() {
+    if (packet != NULL) {
+        return (void*)(packet + 1);
+    }
+    return NULL;
+}
+
+uint32_t LifxPacketWrapper::getSource() {
+    if (packet != NULL) {
+        return packet->frame.source;
+    }
+    return 0;
+}
+
+uint8_t LifxPacketWrapper::getSequence() {
+    if (packet != NULL) {
+        return packet->frameAddress.sequence;
+    }
+    return 0;
+}
+
+uint32_t LifxPacketWrapper::sendUDP(WiFiUDP& Udp) {
+    if (DEBUG >= LOG_INFO) {
+        Serial.printf("<UDP ");
+        dump();
+        Serial.println();
+    }
+
+    // broadcast packet on local subnet
+    IPAddress remote_addr(Udp.remoteIP());
+    IPAddress broadcast_addr(remote_addr[0], remote_addr[1], remote_addr[2], 255);
+
+    Udp.beginPacket(broadcast_addr, Udp.remotePort());
+    size_t written = Udp.write((const char *)packet, getSize());
+    Udp.endPacket();
+
+    return (uint32_t) written;
+}
 
 boolean LifxPacketWrapper::isToBeDumped() {
     if (DEBUG >= LOG_TRACE) {
@@ -81,6 +119,30 @@ void LifxPacketWrapper::dump() {
             for(int i = 0; i < getPayloadSize(); i++) {
                 Serial.printf("%02X ", *((char*)(packet + 1) + i));
             }
+        }
+    }
+}
+
+void LifxPacketWrapper::initResponse(LifxPacketWrapper* pRequest, byte mac[WL_MAC_ADDR_LENGTH], LifxPacketType::Code code, size_t payload_len) {
+    packet->init();
+    packet->frame.size = getResponseSize(payload_len);
+    packet->frame.source = pRequest->getSource();
+    packet->frameAddress.sequence = pRequest->getSequence();
+    packet->protocolHeader.type = (uint16_t)code;
+
+    memcpy(packet->frameAddress.target, mac, sizeof(mac)/sizeof(mac[0]));
+    
+    // Ugly but will do for now
+    packet->frameAddress.target[WL_MAC_ADDR_LENGTH] = 0;
+    packet->frameAddress.target[WL_MAC_ADDR_LENGTH+1] = 0;
+}
+
+void LifxPacketWrapper::handle(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp) {
+    if (DEBUG >= LOG_INFO) {
+        if (isToBeDumped()) {
+            Serial.print(F(">UDP "));
+            dump();
+            Serial.println();
         }
     }
 }

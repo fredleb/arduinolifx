@@ -131,8 +131,23 @@ class LifxPacketWrapper {
         boolean isToBeDumped();
         void dump();
 
+        void handle(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp);
+
         uint16_t getSize();
         uint16_t getPayloadSize();
         LifxPacketType::Code getType();
+        uint32_t getSource();
+        uint8_t getSequence();
+
+        void* getPayload();
+
+        void initResponse(LifxPacketWrapper* pRequest, byte mac[WL_MAC_ADDR_LENGTH], LifxPacketType::Code, size_t payload_len);
+
+        static size_t getResponseSize(size_t size_payload) { return sizeof(LifxPacket) + size_payload; };
+
+        uint32_t sendUDP(WiFiUDP& Udp);
+    private:
+        
+};
 
 };
