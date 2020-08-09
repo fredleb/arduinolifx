@@ -34,6 +34,18 @@ LifxPacketType::Code LifxPacketWrapper::getType() {
     return LifxPacketType::Code::INVALID;
 }
 
+
+boolean LifxPacketWrapper::isToBeDumped() {
+    if (DEBUG >= LOG_TRACE) {
+        return true;
+    }
+
+    if (DEBUG >= LOG_DEBUG) {
+        if (LifxPacketType::isRequest(getType())) {
+            return true;
+        }
+    }
+    return false;
 }
 
 #define SPACE " "
@@ -62,7 +74,7 @@ void LifxPacketWrapper::dump() {
         Serial.printf(", ack_required %s", DISPLAY_BOOLEAN(packet->frameAddress.ack_required));
         Serial.printf(", sequence %i", packet->frameAddress.sequence);
 
-        Serial.printf(", type %i", packet->protocolHeader.type);
+        Serial.printf(", type %s", LifxPacketType::toStr(getType()));
 
         if (getPayloadSize()) {
             Serial.printf(", payload (%i) ", getPayloadSize());

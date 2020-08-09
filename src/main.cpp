@@ -851,10 +851,12 @@ void loop() {
       // wrap it up
       LifxPacketWrapper request(buffer);
 
-      if (DEBUG >= 3) {
-        Serial.print(F(">UDP "));
-        request.dump();
-        Serial.println();
+      if (DEBUG >= LOG_INFO) {
+        if (request.isToBeDumped()) {
+          Serial.print(F(">UDP "));
+          request.dump();
+          Serial.println();
+        }
       }
 
     }
