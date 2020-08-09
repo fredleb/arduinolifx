@@ -27,11 +27,13 @@ uint16_t LifxPacketWrapper::getPayloadSize() {
     return getSize() - sizeof(LifxPacket);
 }
 
-uint16_t LifxPacketWrapper::getType() {
+LifxPacketType::Code LifxPacketWrapper::getType() {
     if (packet != NULL) {
-        return ntohs(packet->protocolHeader.type);
+        return (LifxPacketType::Code)(packet->protocolHeader.type);
     }
-    return 0; // TODO: return invalid type
+    return LifxPacketType::Code::INVALID;
+}
+
 }
 
 #define SPACE " "

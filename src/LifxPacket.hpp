@@ -74,6 +74,56 @@ struct LifxPacket {
     void init();
 };
 
+
+#define CODE_TO_STR(code) case (code) : return #code
+#define CODE_INVALID_STR "!! invalid !!"
+
+struct LifxPacketType {
+    enum Code : uint16_t {
+        INVALID = 0,
+
+        GET_SERVICE = 2,
+        STATE_SERVICE = 3,
+
+        STATE_GROUP = 53,
+
+        ECHO_RESPONSE = 59,
+
+        STATE = 107,
+    };
+
+    static const char* toStr(Code code) {
+        switch (code) {
+            case (INVALID) : return CODE_INVALID_STR;
+
+            CODE_TO_STR(GET_SERVICE);
+            CODE_TO_STR(STATE_SERVICE);
+
+            CODE_TO_STR(STATE_GROUP);
+
+            CODE_TO_STR(ECHO_RESPONSE);
+
+            CODE_TO_STR(STATE);
+
+            default: {
+                Serial.printf("\nWARNING: I don't know what packet type %i = 0x%04X is...\n", code, code);
+                return CODE_INVALID_STR;
+            }
+        }
+    }
+
+    static boolean isRequest(Code code) {
+        switch(code) {
+            case (GET_SERVICE):
+
+                return true;
+
+            default:
+                return false;
+        }
+    }
+};
+
 /**
  * Wrapper around the Lifx packet structure
  * 
@@ -91,6 +141,6 @@ class LifxPacketWrapper {
 
         uint16_t getSize();
         uint16_t getPayloadSize();
-        uint16_t getType();
+        LifxPacketType::Code getType();
 
 };
