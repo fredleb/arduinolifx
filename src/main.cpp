@@ -851,6 +851,10 @@ void loop() {
       // wrap it up
       LifxPacketWrapper request(buffer);
 
+      // need the local MAC address in the answer too
+      byte mac[WL_MAC_ADDR_LENGTH];
+      WiFi.macAddress(mac);
+      request.handle(mac, Udp);
 
     }
     free(buffer);
