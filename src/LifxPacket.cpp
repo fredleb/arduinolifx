@@ -5,7 +5,7 @@
 #define DISPLAY_BOOLEAN(x) ((x) ? "Y" : "_")
 
 void LifxPacket::init() {
-    frame.protocol = htons(1024U);
+    frame.protocol = 1024U;
     frame.addressable = 1;
     frame.origin = 0;
 
@@ -18,7 +18,7 @@ LifxPacketWrapper::LifxPacketWrapper(byte* buffer) {
 
 uint16_t LifxPacketWrapper::getSize() {
     if (packet != NULL) {
-        return ntohs(packet->frame.size);
+        return packet->frame.size;
     }
     return 0;
 }
