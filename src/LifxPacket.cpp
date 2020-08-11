@@ -141,6 +141,11 @@ void LifxPacketWrapper::handle(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp) {
         }
     }
 
+    if (!LifxPacketType::isRequest(getType())) {
+        // it's not a request, ignore it.
+        return;
+    }
+
     switch (getType()) {
         case (LifxPacketType::Code::GET_SERVICE) : {
             LifxHandler<LifxResponse::LifxServiceState> handler(mac, Udp, this);
