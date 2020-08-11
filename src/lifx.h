@@ -1,3 +1,5 @@
+#ifndef __LIFX_H__
+#define __LIFX_H__
 
 const unsigned int LifxProtocol_AllBulbsResponse = 21504; // 0x5400
 const unsigned int LifxProtocol_AllBulbsRequest  = 13312; // 0x3400
@@ -53,3 +55,5 @@ struct LifxEEPROM {
 #define SET_LIGHT_ORIGIN_SETUP 0
 #define SET_LIGHT_ORIGIN_SET_LIGHT_STATE 1
 #define SET_LIGHT_ORIGIN_SET_POWER_STATE 2
+
+#endif
