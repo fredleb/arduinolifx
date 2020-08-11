@@ -1,6 +1,13 @@
 #include "LifxPacket.hpp"
 #include "util.h"
 
+// TODO: remove this horror
+extern long power_status;
+extern long hue;
+extern long sat;
+extern long bri;
+extern long kel;
+
 // Here you can tweak the boolean answer to make them more visible in the output.
 #define DISPLAY_BOOLEAN(x) ((x) ? "Y" : "_")
 
