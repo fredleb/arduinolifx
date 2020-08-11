@@ -12,6 +12,12 @@ const unsigned int LifxPort            = 56700;  // local port to listen on
 #define LIFX_LABEL_LENGTH 32
 #define LIFX_LABEL_DEFAULT "ESP8266 Lifx"
 
+#define LIFX_LOCATION_LENGTH 16
+#define LIFX_LOCATION_DEFAULT "Outta space"
+
+#define LIFX_GROUP_LENGTH 16
+#define LIFX_GROUP_DEFAULT "Home made"
+
 #define LIFX_WIFI_SSID_LENGTH 32
 #define LIFX_WIFI_PASSWORD_LENGTH 64
 
@@ -36,6 +42,10 @@ const unsigned int LifxFirmwareVersionMinor = 5;
 struct LifxEEPROM {
   char sMagic[LIFX_MAGIC_LENGTH + 1];
   char sLabel[LIFX_LABEL_LENGTH + 1];
+  char sLocation[LIFX_LOCATION_LENGTH + 1];
+  uint64_t location_updated_at;
+  char sGroup[LIFX_GROUP_LENGTH + 1];
+  uint64_t group_updated_at;
   char sSSID[LIFX_WIFI_SSID_LENGTH + 1];
   char sPassword[LIFX_WIFI_PASSWORD_LENGTH + 1];
 };
