@@ -148,25 +148,34 @@ void LifxPacketWrapper::handle(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp) {
 
     switch (getType()) {
         case (LifxPacketType::Code::GET_SERVICE) : {
-            LifxHandler<LifxResponse::LifxServiceState> handler(mac, Udp, this);
-            handler.handle(LifxPacketType::Code::STATE_SERVICE, [](LifxResponse::LifxServiceState * pState) {
+            LifxHandler<LifxProtocol::LifxServiceState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_SERVICE, [](LifxProtocol::LifxServiceState * pState) {
                     pState->port = LIFX_PORT;
-                    pState->service = LifxResponse::service_UDP;
+                    pState->service = LifxProtocol::service_UDP;
                 } );
         } break;
 
         case (LifxPacketType::Code::GET_HOST_FIRMWARE) : {
-            LifxHandler<LifxResponse::LifxHostFirmwareState> handler(mac, Udp, this);
-            handler.handle(LifxPacketType::Code::STATE_HOST_FIRMWARE, [](LifxResponse::LifxHostFirmwareState * pState) {
+            LifxHandler<LifxProtocol::LifxHostFirmwareState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_HOST_FIRMWARE, [](LifxProtocol::LifxHostFirmwareState * pState) {
                     pState->build = 0;
-                    pState->version_minor = 1;
-                    pState->version_major = 2;
+                    pState->version_minor = 5;
+                    pState->version_major = 1;
+                } );
+        } break;
+
+        case (LifxPacketType::Code::GET_WIFI_INFO) : {
+            LifxHandler<LifxProtocol::LifxWifiInfoState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_WIFI_INFO, [](LifxProtocol::LifxWifiInfoState * pState) {
+                    pState->signal = 10;
+                    pState->rx = 1024;
+                    pState->tx = 1024;
                 } );
         } break;
 
         case (LifxPacketType::Code::GET_WIFI_FIRMWARE) : {
-            LifxHandler<LifxResponse::LifxWifiFirmwareState> handler(mac, Udp, this);
-            handler.handle(LifxPacketType::Code::STATE_WIFI_FIRMWARE, [](LifxResponse::LifxWifiFirmwareState * pState) {
+            LifxHandler<LifxProtocol::LifxWifiFirmwareState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_WIFI_FIRMWARE, [](LifxProtocol::LifxWifiFirmwareState * pState) {
                     pState->build = 0;
                     pState->version_minor = 1;
                     pState->version_major = 2;
@@ -174,18 +183,72 @@ void LifxPacketWrapper::handle(byte mac[WL_MAC_ADDR_LENGTH], WiFiUDP& Udp) {
         } break;
 
         case (LifxPacketType::Code::GET_LABEL) : {
-            LifxHandler<LifxResponse::LifxLabelState> handler(mac, Udp, this);
-            handler.handle(LifxPacketType::Code::STATE_LABEL, [](LifxResponse::LifxLabelState * pState) {
+            LifxHandler<LifxProtocol::LifxLabelState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_LABEL, [](LifxProtocol::LifxLabelState * pState) {
                 memcpy(pState->label, eeprom.sLabel, LIFX_LABEL_LENGTH);
             } );
         } break;
 
         case (LifxPacketType::Code::GET_VERSION) : {
-            LifxHandler<LifxResponse::LifxVersionState> handler(mac, Udp, this);
-            handler.handle(LifxPacketType::Code::STATE_VERSION, [](LifxResponse::LifxVersionState * pState) {
+            LifxHandler<LifxProtocol::LifxVersionState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_VERSION, [](LifxProtocol::LifxVersionState * pState) {
                     pState->vendor = 1;
                     pState->product = 1;
                     pState->version = 1;
+            } );
+        } break;
+
+        case (LifxPacketType::Code::GET_LOCATION) : {
+            LifxHandler<LifxProtocol::LifxLocationState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_LOCATION, [](LifxProtocol::LifxLocationState * pState) {
+                memcpy(pState->location, eeprom.sLocation, LIFX_LOCATION_LENGTH);
+                memcpy(pState->label, eeprom.sLabel, LIFX_LABEL_LENGTH);
+                pState->updated_at = eeprom.location_updated_at;
+            } );
+        } break;
+
+        case (LifxPacketType::Code::GET_GROUP) : {
+            LifxHandler<LifxProtocol::LifxGroupState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_GROUP, [](LifxProtocol::LifxGroupState * pState) {
+                memcpy(pState->group, eeprom.sGroup, LIFX_GROUP_LENGTH);
+                memcpy(pState->label, eeprom.sLabel, LIFX_LABEL_LENGTH);
+                pState->updated_at = eeprom.group_updated_at;
+            } );
+        } break;
+
+        case (LifxPacketType::Code::GET) : {
+            LifxHandler<LifxProtocol::LifxState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE, [](LifxProtocol::LifxState * pState) {
+
+                // TODO replace these globals
+                pState->color.hue = hue;
+                pState->color.brightness = bri;
+                pState->color.saturation = sat;
+                pState->color.kelvin = kel;
+                pState->power = power_status;
+
+                memcpy(pState->label, eeprom.sLabel, LIFX_LABEL_LENGTH);
+            } );
+        } break;
+
+        case (LifxPacketType::Code::SET_POWER) : {
+            LifxProtocol::LifxPowerSet * pSet = (LifxProtocol::LifxPowerSet *)getPayload();
+            power_status = pSet->level;
+            if ( packet->frameAddress.ack_required) {
+                LifxHandler<void> handler(mac, Udp, this);
+                handler.handleEmpty(LifxPacketType::Code::ACKNOWLEDGEMENT);
+            }
+            /*
+            if ( ! packet->frameAddress.res_required) {
+                break;
+            }
+            */
+        } // no break
+
+        case (LifxPacketType::Code::GET_POWER) : {
+            LifxHandler<LifxProtocol::LifxPowerState> handler(mac, Udp, this);
+            handler.handle(LifxPacketType::Code::STATE_POWER, [](LifxProtocol::LifxPowerState * pState) {
+                pState->power = power_status;
             } );
         } break;
 

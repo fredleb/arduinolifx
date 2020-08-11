@@ -92,7 +92,7 @@ struct LifxPacketType {
         STATE_HOST_INFO = 13,
         GET_HOST_FIRMWARE = 14,
         STATE_HOST_FIRMWARE = 15,
-
+        GET_WIFI_INFO = 16,
         STATE_WIFI_INFO = 17,
         GET_WIFI_FIRMWARE = 18,
         STATE_WIFI_FIRMWARE = 19,
@@ -104,11 +104,23 @@ struct LifxPacketType {
         GET_VERSION = 32,
         STATE_VERSION = 33,
 
+        ACKNOWLEDGEMENT = 45,
+
+        GET_LOCATION = 48,
+        SET_LOCATION = 49,
+        STATE_LOCATION = 50,
+        GET_GROUP = 51,
+        SET_GROUP = 52,
         STATE_GROUP = 53,
 
         ECHO_RESPONSE = 59,
 
+        GET = 101,
         STATE = 107,
+
+        GET_POWER = 116,
+        SET_POWER = 117,
+        STATE_POWER = 118,
     };
 
     static const char* toStr(Code code) {
@@ -121,7 +133,7 @@ struct LifxPacketType {
             CODE_TO_STR(STATE_HOST_INFO);
             CODE_TO_STR(GET_HOST_FIRMWARE);
             CODE_TO_STR(STATE_HOST_FIRMWARE);
-
+            CODE_TO_STR(GET_WIFI_INFO);
             CODE_TO_STR(STATE_WIFI_INFO);
             CODE_TO_STR(GET_WIFI_FIRMWARE);
             CODE_TO_STR(STATE_WIFI_FIRMWARE);
@@ -133,11 +145,24 @@ struct LifxPacketType {
             CODE_TO_STR(GET_VERSION);
             CODE_TO_STR(STATE_VERSION);
 
+            CODE_TO_STR(ACKNOWLEDGEMENT);
+
+            CODE_TO_STR(GET_LOCATION);
+            CODE_TO_STR(SET_LOCATION);
+            CODE_TO_STR(STATE_LOCATION);
+
+            CODE_TO_STR(GET_GROUP);
+            CODE_TO_STR(SET_GROUP);
             CODE_TO_STR(STATE_GROUP);
 
             CODE_TO_STR(ECHO_RESPONSE);
 
+            CODE_TO_STR(GET);
             CODE_TO_STR(STATE);
+
+            CODE_TO_STR(GET_POWER);
+            CODE_TO_STR(SET_POWER);
+            CODE_TO_STR(STATE_POWER);
 
             default: {
                 Serial.printf("\nWARNING: I don't know what packet type %i = 0x%04X is...\n", code, code);
@@ -149,10 +174,19 @@ struct LifxPacketType {
     static boolean isRequest(Code code) {
         switch(code) {
             case (GET_SERVICE):
-            case (GET_WIFI_FIRMWARE):
             case (GET_HOST_FIRMWARE):
+            case (GET_WIFI_INFO):
+            case (GET_WIFI_FIRMWARE):
             case (GET_LABEL):
             case (SET_LABEL):
+            case (GET_VERSION):
+            case (GET_LOCATION):
+            case (SET_LOCATION):
+            case (GET_GROUP):
+            case (SET_GROUP):
+            case (GET):
+            case (GET_POWER):
+            case (SET_POWER):
 
                 return true;
 
@@ -223,15 +257,33 @@ class LifxHandler {
             response.sendUDP(wifiUDP);
             free(buffer);
         };
+
+        void handleEmpty(LifxPacketType::Code code) {
+            size_t packetLen = LifxPacketWrapper::getResponseSize(0);
+            byte* buffer = (byte*)malloc(packetLen);
+            LifxPacketWrapper response(buffer);
+            response.initResponse(pRequest, local_mac, code, 0);
+            response.sendUDP(wifiUDP);
+            free(buffer);
+        };
 };
 
-class LifxResponse {
+class LifxProtocol {
     public:
 
         static uint8_t const service_UDP = 1; // @see https://lan.developer.lifx.com/docs/device-messages#section-service
 
+        #pragma pack(push, 1)
+        struct LifxHSBK {
+            uint16_t hue;
+            uint16_t saturation;
+            uint16_t brightness;
+            uint16_t kelvin;
+        };
+        #pragma pack(pop)
+
         /**
-         * Response structure
+         * Response structure STATE_SERVICE
          * 
          * @see https://lan.developer.lifx.com/docs/device-messages#section-stateservice-3
          */
@@ -243,7 +295,7 @@ class LifxResponse {
         #pragma pack(pop)
 
         /**
-         * Response structure
+         * Response structure STATE_HOST_FIRMWARE
          * 
          * @see https://lan.developer.lifx.com/docs/device-messages#section-statehostfirmware-15
          */
@@ -257,7 +309,21 @@ class LifxResponse {
         #pragma pack(pop)
 
         /**
-         * Response structure
+         * Response structure STATE_WIFI_INFO
+         * 
+         * @see https://lan.developer.lifx.com/docs/device-messages#section-statewifiinfo-17
+         */
+        #pragma pack(push, 1)
+        struct LifxWifiInfoState {
+            float_t signal;
+            uint32_t tx;
+            uint32_t rx;
+            int16_t reserved;
+        };
+        #pragma pack(pop)
+
+        /**
+         * Response structure STATE_WIFI_FIRMWARE
          * 
          * @see https://lan.developer.lifx.com/docs/device-messages#section-statewififirmware-19
          */
@@ -271,7 +337,7 @@ class LifxResponse {
         #pragma pack(pop)
 
         /**
-         * Response structure
+         * Response structure STATE_LABEL
          * 
          * @see https://lan.developer.lifx.com/docs/device-messages#section-statelabel-25
          */
@@ -282,7 +348,33 @@ class LifxResponse {
         #pragma pack(pop)
 
         /**
-         * Response structure
+         * Response structure STATE_LOCATION
+         * 
+         * @see https://lan.developer.lifx.com/docs/device-messages#section-setlocation-49
+         */
+        #pragma pack(push, 1)
+        struct LifxLocationState {
+            char location[LIFX_LOCATION_LENGTH];
+            char label[LIFX_LABEL_LENGTH];
+            int64_t updated_at;
+        };
+        #pragma pack(pop)
+
+        /**
+         * Response structure STATE_GROUP
+         * 
+         * @see https://lan.developer.lifx.com/docs/device-messages#section-stategroup-53
+         */
+        #pragma pack(push, 1)
+        struct LifxGroupState {
+            char group[LIFX_GROUP_LENGTH];
+            char label[LIFX_LABEL_LENGTH];
+            int64_t updated_at;
+        };
+        #pragma pack(pop)
+
+        /**
+         * Response structure STATE_VERSION
          * 
          * @see https://lan.developer.lifx.com/docs/device-messages#section-stateversion-33
          */
@@ -291,6 +383,44 @@ class LifxResponse {
             uint32_t vendor;
             uint32_t product;
             uint32_t version;
+        };
+        #pragma pack(pop)
+
+        /**
+         * Response structure STATE
+         * 
+         * @see https://lan.developer.lifx.com/docs/light-messages#section-state-107
+         */
+        #pragma pack(push, 1)
+        struct LifxState {
+            LifxHSBK color;
+            int16_t reserved0;
+            uint16_t power;
+            char label[LIFX_LABEL_LENGTH];
+            uint64_t reserved1;
+        };
+        #pragma pack(pop)
+
+        /**
+         * Response structure SET_POWER
+         * 
+         * @see https://lan.developer.lifx.com/docs/light-messages#section-setpower-117
+         */
+        #pragma pack(push, 1)
+        struct LifxPowerSet {
+            uint16_t level;
+            uint32_t duration;
+        };
+        #pragma pack(pop)
+
+        /**
+         * Response structure STATE_POWER
+         * 
+         * @see https://lan.developer.lifx.com/docs/light-messages#section-statepower-118
+         */
+        #pragma pack(push, 1)
+        struct LifxPowerState {
+            uint16_t power;
         };
         #pragma pack(pop)
 };
