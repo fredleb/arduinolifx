@@ -737,6 +737,16 @@ void setup() {
     strncpy(eeprom.sLabel, LIFX_LABEL_DEFAULT, LIFX_LABEL_LENGTH);
     eeprom.sLabel[LIFX_LABEL_LENGTH] = 0;
 
+    strncpy(eeprom.sLocation, LIFX_LOCATION_DEFAULT, LIFX_LOCATION_LENGTH);
+    eeprom.sLocation[LIFX_LOCATION_LENGTH] = 0;
+
+    eeprom.location_updated_at = 0;
+
+    strncpy(eeprom.sGroup, LIFX_GROUP_DEFAULT, LIFX_GROUP_LENGTH);
+    eeprom.sGroup[LIFX_GROUP_LENGTH] = 0;
+
+    eeprom.group_updated_at = 0;
+
     #ifdef DEFAULT_WIFI_SSID
       strncpy(eeprom.sSSID, DEFAULT_WIFI_SSID, LIFX_WIFI_SSID_LENGTH);
       eeprom.sSSID[LIFX_WIFI_SSID_LENGTH] = 0;
